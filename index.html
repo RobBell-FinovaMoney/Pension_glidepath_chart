@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>De-risking before retirement: the effect on pot size</title>
+<style>
+  .fin-chart { max-width: 720px; margin: 0 auto; padding: 20px; box-sizing: border-box;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: #1f2421; line-height: 1.55; }
+  .fin-chart * { box-sizing: border-box; }
+  .fin-chart h2 { font-size: 20px; font-weight: 600; margin: 0 0 4px; }
+  .fin-chart .fin-sub { font-size: 14px; color: #5c625e; margin: 0 0 16px; }
+  .fin-legend { display: flex; flex-wrap: wrap; gap: 18px; font-size: 13px; color: #5c625e; margin: 0 0 12px; }
+  .fin-legend span { display: inline-flex; align-items: center; gap: 7px; }
+  .fin-legend svg { flex: 0 0 auto; }
+  .fin-canvas-wrap { position: relative; width: 100%; height: 320px; }
+  .fin-controls { margin: 20px 0 4px; padding: 16px; background: #f4f6f5; border-radius: 10px; }
+  .fin-controls label { display: block; font-size: 13px; color: #5c625e; margin-bottom: 8px; }
+  .fin-controls input[type=range] { width: 100%; accent-color: #1d9e75; }
+  .fin-potval { font-size: 18px; font-weight: 600; color: #1f2421; }
+  .fin-results { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 14px; }
+  .fin-card { background: #fff; border: 1px solid #e2e6e4; border-radius: 10px; padding: 12px; text-align: center; }
+  .fin-card .fin-lbl { font-size: 12px; color: #5c625e; margin-bottom: 6px; min-height: 30px; }
+  .fin-card .fin-num { font-size: 22px; font-weight: 600; }
+  .fin-card.through .fin-num { color: #147a58; }
+  .fin-card.annuity .fin-num { color: #b0491f; }
+  .fin-card.gap { background: #fbeee7; border-color: #f0d4c4; }
+  .fin-card.gap .fin-num { color: #b0491f; }
+  .fin-note { font-size: 12px; color: #5c625e; margin: 12px 0 0; }
+  .fin-warn { margin-top: 20px; padding: 14px 16px; border: 1px solid #e2e6e4;
+    border-left: 4px solid #b0491f; border-radius: 8px; background: #fff; }
+  .fin-warn h3 { font-size: 13px; font-weight: 600; margin: 0 0 8px; text-transform: uppercase; letter-spacing: 0.03em; color: #b0491f; }
+  .fin-warn ul { margin: 0; padding-left: 18px; }
+  .fin-warn li { font-size: 12.5px; color: #4a4f4c; margin-bottom: 6px; }
+  .fin-def { font-size: 12.5px; color: #5c625e; margin: 14px 0 0; }
+  .fin-src { font-size: 12px; color: #8a908c; margin: 12px 0 0; }
+  .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0; }
+  @media (max-width: 520px) { .fin-results { grid-template-columns: 1fr; } .fin-canvas-wrap { height: 280px; } }
+</style>
+</head>
+<body>
+<div class="fin-chart">
+  <h2>De-risking before retirement: the effect on pot size</h2>
+  <p class="fin-sub">How much you hold in growth assets in the final years before retirement, and the pot each approach might leave you with on the day you retire.</p>
+
+  <div class="fin-legend">
+    <span><svg width="28" height="10" aria-hidden="true"><line x1="0" y1="5" x2="28" y2="5" stroke="#1d9e75" stroke-width="3"/></svg>Gradual de-risking (keeps a growth floor)</span>
+    <span><svg width="28" height="10" aria-hidden="true"><line x1="0" y1="5" x2="28" y2="5" stroke="#d85a30" stroke-width="3" stroke-dasharray="2 4" stroke-linecap="round"/></svg>Steep, early de-risking (annuity-shaped)</span>
+  </div>
+
+  <div class="fin-canvas-wrap">
+    <canvas id="finGlidepath" role="img" aria-label="Line chart comparing two de-risking approaches by proportion held in growth assets over the final 15 years before retirement. A gradual approach keeps more growth assets and lands near 55 percent at the retirement date. A steep, early approach de-risks hard and lands near 3 percent growth assets at the retirement date.">Gradual de-risking keeps about 55 percent in growth assets at retirement; steep early de-risking falls to near 3 percent.</canvas>
+  </div>
+
+  <div class="fin-controls">
+    <label for="finPot">Your pot value 10 years before retirement: <span class="fin-potval" id="finPotOut">£100,000</span></label>
+    <input type="range" id="finPot" min="25000" max="500000" step="5000" value="100000" aria-label="Pot value 10 years before retirement">
+    <div class="fin-results" aria-live="polite">
+      <div class="fin-card through">
+        <div class="fin-lbl">Gradual de-risking (keeps a growth floor)</div>
+        <div class="fin-num" id="finThrough">£162,000</div>
+      </div>
+      <div class="fin-card annuity">
+        <div class="fin-lbl">Steep, early de-risking (annuity-shaped)</div>
+        <div class="fin-num" id="finAnnuity">£146,000</div>
+      </div>
+      <div class="fin-card gap">
+        <div class="fin-lbl">How much smaller the pot might be at retirement</div>
+        <div class="fin-num" id="finGap">£16,000</div>
+      </div>
+    </div>
+    <p class="fin-note">Each path's return reflects the mix of growth and defensive assets it holds each year on the chart above, using illustrative returns of 6.5% a year for growth assets and 2% a year for defensive assets. No further contributions are assumed.</p>
+  </div>
+
+  <p class="fin-def">Growth assets (such as company shares) aim for long-term growth but move up and down more in the short term. Defensive assets (such as bonds and cash) aim for stability but usually deliver lower long-term growth. The figures above show the projected pot value at the retirement date for a pot starting the final decade at the value you choose. They assume no income is taken over the period shown. Once you are in retirement and drawing an income, your withdrawals reduce the pot on top of investment returns, and taking income while markets are falling can deepen the impact.</p>
+
+  <p class="fin-def" style="border-top: 1px solid #e6e9e7; padding-top: 12px;"><strong>This shows only one side of a trade-off.</strong> The figures are the growth a more cautious path may give up. Holding more in growth assets also means bigger ups and downs, and a large fall just before or early in retirement can do lasting damage, especially once you begin drawing an income (this is known as sequencing risk). More growth assets is not automatically better. The right balance depends on your plan, your other income, and how much risk you can afford to take and are comfortable with.</p>
+
+  <div class="fin-warn">
+    <h3>Important risk information</h3>
+    <ul>
+      <li>This is an illustration of a general principle. It is not financial advice or a personal recommendation.</li>
+      <li>The 6.5% a year for growth assets and 2% a year for defensive assets are assumptions chosen for illustration only. They are not forecasts, and actual returns will vary and can be negative.</li>
+      <li>The value of investments can fall as well as rise, and you could get back less than you invest.</li>
+      <li>Holding more in growth assets increases short-term ups and downs and the risk of larger falls. More growth assets is not automatically better, particularly close to or during retirement.</li>
+      <li>Past performance is not a guide to future performance.</li>
+      <li>The figures ignore charges, inflation and tax, all of which would reduce the amounts shown.</li>
+      <li>These figures assume no income is taken. In retirement, the income you withdraw reduces the pot as well as returns, and withdrawing while markets are down can accelerate the fall.</li>
+      <li>"Growth assets" and "defensive assets" are broad categories. This illustration is not based on any specific fund, strategy or provider.</li>
+    </ul>
+  </div>
+
+  <p class="fin-src">Finova Money. Glidepaths are illustrative and show growth-asset proportions only.</p>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+(function () {
+  var labels = ['15 yrs','12','10','8','6','4','2','Retirement'];
+  var gradual = [82,79,76,72,66,61,57,55];
+  var steep   = [80,77,73,62,46,28,12,3];
+  var retIdx = 7;
+
+  function landing(arr, color) {
+    return {
+      data: labels.map(function (_, i) { return i === retIdx ? arr[i] : null; }),
+      pointRadius: labels.map(function (_, i) { return i === retIdx ? 6 : 0; }),
+      pointBackgroundColor: color,
+      pointBorderColor: '#ffffff',
+      pointBorderWidth: 2,
+      showLine: false,
+      order: 0
+    };
+  }
+
+  new Chart(document.getElementById('finGlidepath'), {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [
+        { label: 'Gradual de-risking', data: gradual, borderColor: '#1d9e75', borderWidth: 3, pointRadius: 0, tension: 0.3, order: 1 },
+        { label: 'Steep, early de-risking (annuity-shaped)', data: steep, borderColor: '#d85a30', borderWidth: 3, borderDash: [2,4], pointRadius: 0, tension: 0.3, order: 2 },
+        landing(gradual, '#1d9e75'),
+        landing(steep, '#d85a30')
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          filter: function (item) { return item.datasetIndex < 2; },
+          callbacks: {
+            title: function (items) { return items[0].label === 'Retirement' ? 'At retirement' : items[0].label + ' years to retirement'; },
+            label: function (ctx) { return ctx.dataset.label + ': ' + Math.round(ctx.parsed.y) + '% growth assets'; }
+          }
+        }
+      },
+      scales: {
+        y: {
+          min: 0, max: 100,
+          title: { display: true, text: 'Proportion in growth assets (%)', color: '#5c625e', font: { size: 12 } },
+          ticks: { color: '#5c625e', callback: function (v) { return v + '%'; } },
+          grid: { color: '#e6e9e7' }
+        },
+        x: {
+          title: { display: true, text: 'Years to retirement', color: '#5c625e', font: { size: 12 } },
+          ticks: { color: '#5c625e', autoSkip: false, maxRotation: 45, minRotation: 0 },
+          grid: { display: false }
+        }
+      }
+    }
+  });
+
+  var gbp = new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP', maximumFractionDigits: 0 });
+  function round1000(v) { return Math.round(v / 1000) * 1000; }
+
+  var G_RET = 0.065, D_RET = 0.02;
+  var gradualWeights = [0.76,0.74,0.72,0.69,0.66,0.635,0.61,0.59,0.57,0.56];
+  var steepWeights   = [0.73,0.675,0.62,0.54,0.46,0.37,0.28,0.20,0.12,0.075];
+  function project(pot, weights) {
+    for (var i = 0; i < weights.length; i++) {
+      var w = weights[i];
+      pot *= (1 + w * G_RET + (1 - w) * D_RET);
+    }
+    return pot;
+  }
+
+  var slider = document.getElementById('finPot');
+  var potOut = document.getElementById('finPotOut');
+  var throughOut = document.getElementById('finThrough');
+  var annuityOut = document.getElementById('finAnnuity');
+  var gapOut = document.getElementById('finGap');
+
+  function update() {
+    var pot = parseFloat(slider.value);
+    var t = project(pot, gradualWeights);
+    var a = project(pot, steepWeights);
+    potOut.textContent = gbp.format(pot);
+    throughOut.textContent = gbp.format(round1000(t));
+    annuityOut.textContent = gbp.format(round1000(a));
+    gapOut.textContent = gbp.format(round1000(t - a));
+  }
+  slider.addEventListener('input', update);
+  update();
+})();
+</script>
+</body>
+</html>
